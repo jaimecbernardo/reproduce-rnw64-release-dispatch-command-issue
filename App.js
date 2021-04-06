@@ -8,49 +8,24 @@
 
 import React from 'react';
 import type {Node} from 'react';
-import {
+import ReactNative, {
   SafeAreaView,
   ScrollView,
   StatusBar,
-  StyleSheet,
   Text,
   useColorScheme,
   View,
+  UIManager,
+  Button,
+  requireNativeComponent,
 } from 'react-native';
 
 import {
   Colors,
-  DebugInstructions,
   Header,
-  LearnMoreLinks,
-  ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+const RNSimple = requireNativeComponent('RNSimple');
 
 const App: () => Node = () => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -58,6 +33,9 @@ const App: () => Node = () => {
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
+
+  let nativeCompHandle;
+  let numberOfPresses = 0;
 
   return (
     <SafeAreaView style={backgroundStyle}>
@@ -69,44 +47,26 @@ const App: () => Node = () => {
         <View
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
+            height:500,
+            padding:24
           }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+          <Text>Button to change the RNSimple contents after 1 second. Works on Debug. On Release, it waits for an UI change before sending the command.</Text>
+          <Button title="ChangeText" onPress={() => {
+            numberOfPresses++;
+            let currentPresses = numberOfPresses;
+            setTimeout( () => {
+              UIManager.dispatchViewManagerCommand(
+                nativeCompHandle,
+                UIManager.getViewManagerConfig('RNSimple').Commands.changeText,
+                [ "The button has been pressed " + currentPresses + " times." ]
+              );
+            }, 2000);
+          }} />
+          <RNSimple ref={ref => {nativeCompHandle = ReactNative.findNodeHandle(ref)}} style={{flex:1}}/>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;
